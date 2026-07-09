@@ -1,0 +1,76 @@
+.app-footer {
+  border-top: 1px solid #e6e9ef;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.app-footer__row {
+  display: flex;
+  align-items: center;
+  margin-left: 3%;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.app-footer__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.app-footer__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #0f766e 0%, #1e3a5f 100%);
+}
+
+.app-footer__name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.app-footer__links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.app-footer__link {
+  font-size: 15px;
+  color: #475569;
+  text-decoration: none;
+}
+.app-footer__link:hover {
+  color: #0f172a;
+  text-decoration: underline;
+}
+
+.app-footer__copyright {
+  margin: 1px 0 0;
+  text-align: left;
+  margin-left: 3%;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+@media (max-width: 640px) {
+  .app-footer__row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .app-footer__links {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+}
+@media (max-width: 420px) {
+  .app-footer { padding: 16px; }
+  .app-footer__links { gap: 12px; }
+  .app-footer__name { font-size: 15px; }
+}
