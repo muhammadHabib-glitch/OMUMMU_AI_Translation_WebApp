@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import "./Signup.css";
 import googleLogo from '../assets/Logos/google.png';
 import appleLogo from '../assets/Logos/apple.png';
@@ -62,9 +63,9 @@ export default function Signup() {
           </div>
 
           <div className="divider">
-            <span className="divider-line"></span>
+            {/* <span className="divider-line"></span> */}
             <span className="divider-text">or</span>
-            <span className="divider-line"></span>
+            {/* <span className="divider-line"></span> */}
           </div>
 
           <form className="signup-form">
@@ -122,7 +123,7 @@ export default function Signup() {
           </form>
 
           <p className="signin-text">
-            Already have an account? <a href="#">Sign in</a>
+            Already have an account?<Link to="/signin">Sign in</Link>
           </p>
 
           <p className="terms-text">

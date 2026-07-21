@@ -118,11 +118,13 @@ html, body, #root {
 }
 
 .form-title {
-  font-size: clamp(1.1rem, 2.6vh, 1.7rem);
+  font-size: clamp(2rem, 3vh, 2rem);
   text-align: left;
-  font-weight: 800;
+  font-weight: 700;
+  size: 28px;
+  text-decoration:bold;
   color: #14213d;
-  margin: 0 0 1.6vh 0;
+  margin: 1 0 1.6vh 0;
 }
 
 .form-subtitle {
@@ -135,7 +137,7 @@ html, body, #root {
 .social-buttons {
   display: flex;
   gap: 16px;
-  margin-bottom: 1.4vh;
+  margin-bottom: 1vh;
 }
 
 .social-btn {
@@ -172,16 +174,15 @@ html, body, #root {
 
 .divider {
   display: flex;
-  align-items: center;
-  margin-bottom: 1.4vh;
-  margin-top:1.4vh ;
+  justify-content: center;
+  margin: 12px 0;
 }
 
-.divider-line {
+/* .divider-line {
   flex: 1;
   height: 2px;
   background: #dfe3e8;
-}
+} */
 
 .divider-text {
   padding: 0 14px;
@@ -191,11 +192,12 @@ html, body, #root {
 
 .signup-form {
   display: flex;
+  margin-top: -2vh;
   flex-direction: column;
 }
 
 .form-group {
-  margin-bottom: 1.1vh;
+  margin-bottom: 0.2vh;
   display: flex;
   flex-direction: column;
 }

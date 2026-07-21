@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import "./Translate.css";
 import Footer from "./Footer";
+import Navbar from "./Navbar";
 
 // PRD ref: Text-to-Text Translation (Core Translation Features)
 // + shortcuts into Voice / Image / Document translation + AI Assistant
@@ -231,6 +232,8 @@ export default function TranslateScreen() {
   };
 
   return (
+    <div>
+          <Navbar/>
     <div className="translate-scroll">
     <div className="translate-page">
       <div className="translate-header">
@@ -402,6 +405,7 @@ export default function TranslateScreen() {
           ))}
         </ul>
       </div>
+    </div>
     </div>
     <Footer/>
     </div>

@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "iconoir-react": "^7.11.1",
     "lucide-react": "^1.23.0",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.1"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",

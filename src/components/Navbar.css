@@ -14,6 +14,29 @@
   align-items: center;
   gap: 12px;
 }
+.avatar-dropdown {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  background: #fff;
+  border: 1px solid #eef0f2;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  min-width: 140px;
+  z-index: 30;
+}
+.avatar-dropdown li {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #374151;
+  cursor: pointer;
+}
+.avatar-dropdown li:hover {
+  background: #f5f6fa;
+}
 
 .navbar-logo {
   width: 40px;
