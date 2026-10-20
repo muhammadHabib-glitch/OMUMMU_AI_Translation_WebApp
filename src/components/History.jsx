@@ -1,243 +1,277 @@
-import React, { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Search,
+  Star,
+  Type,
+  Mic,
+  Camera,
+  FileText,
+  Clock,
+  Languages,
+  Heart,
+  Trash2,
+  Loader2,
+} from "lucide-react";
+import AppLayout from "./AppLayout";
+import {
+  fetchHistory,
+  fetchLanguages,
+  toggleHistoryFavorite,
+  deleteHistoryItem,
+} from "../services/mockApi";
+import { mapHistoryItem } from "../utils/historyUtils";
 import "./History.css";
-import Navbar from "./Navbar";
-import Footer from "./Footer";
-import logo from "../assets/logo.png";
 
-const STATS = [
-  { icon: "🕘", value: "127 Total", label: "TRANSLATIONS" },
-  { icon: "⭐", value: "12 Favorites", label: "SAVED ITEMS" },
-  { icon: "🌐", value: "8 Languages", label: "ACTIVE PAIRS" },
-  { icon: "📈", value: "34 This week", label: "GROWTH RATE" },
+const FILTERS = [
+  { id: "All", label: "All" },
+  { id: "Favorites", label: "Favorites" },
+  { id: "text", label: "Text" },
+  { id: "voice", label: "Voice" },
+  { id: "camera", label: "Camera" },
+  { id: "document", label: "Document" },
 ];
 
-const FILTERS = ["All", "Favorites", "English", "Igbo"];
-
-const ROWS = [
-  {
-    id: 1,
-    source: "Hello, how are you today?",
-    translation: "Kedu, kedu ka i mere taa?",
-    from: "EN",
-    to: "IG",
-    mode: "Voice",
-    date: "Today 2:34 PM",
-    favorite: true,
-  },
-  {
-    id: 2,
-    source: "Good morning",
-    translation: "Ụtụtụ ọma",
-    from: "EN",
-    to: "IG",
-    mode: "Text",
-    date: "Today 11:15 AM",
-    favorite: false,
-  },
-  {
-    id: 3,
-    source: "Where is the station?",
-    translation: "Kedu ka ebe ọdụ oloko?",
-    from: "EN",
-    to: "IG",
-    mode: "Camera",
-    date: "Yesterday",
-    favorite: false,
-  },
-  {
-    id: 4,
-    source: "Thank you",
-    translation: "Daalụ",
-    from: "EN",
-    to: "IG",
-    mode: "Text",
-    date: "Yesterday",
-    favorite: true,
-  },
-  {
-    id: 5,
-    source: "Welcome to Lagos",
-    translation: "Barka da zuwa Legas",
-    from: "EN",
-    to: "HA",
-    mode: "Text",
-    date: "3 days ago",
-    favorite: false,
-  },
-  {
-    id: 6,
-    source: "Good morning, family",
-    translation: "Habari za asubuhi, familia",
-    from: "EN",
-    to: "SW",
-    mode: "Voice",
-    date: "Last week",
-    favorite: false,
-  },
-];
-
-const MODE_ICON = {
-  Voice: "🎤",
-  Text: "📄",
-  Camera: "📷",
+const MODE_ICONS = {
+  text: Type,
+  voice: Mic,
+  camera: Camera,
+  document: FileText,
 };
 
+const GROUP_ORDER = ["TODAY", "YESTERDAY"];
+
 export default function History() {
-  const [rows, setRows] = useState(ROWS);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
   const [search, setSearch] = useState("");
+  const [busyId, setBusyId] = useState(null);
 
-  const toggleFavorite = (id) =>
-    setRows((r) => r.map((row) => (row.id === id ? { ...row, favorite: !row.favorite } : row)));
+  const loadHistory = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const [historyData, langCatalog] = await Promise.all([fetchHistory(), fetchLanguages()]);
+      const mapped = (historyData.items || []).map((row) => mapHistoryItem(row, langCatalog));
+      setItems(mapped);
+    } catch (err) {
+      setError(err?.message || "Unable to load history.");
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const deleteRow = (id) => setRows((r) => r.filter((row) => row.id !== id));
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
 
-  const filteredRows = rows.filter((row) => {
-    const matchesSearch =
-      row.source.toLowerCase().includes(search.toLowerCase()) ||
-      row.translation.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter =
-      activeFilter === "All" ||
-      (activeFilter === "Favorites" && row.favorite) ||
-      (activeFilter === "English" && row.from === "EN") ||
-      (activeFilter === "Igbo" && row.to === "IG");
-    return matchesSearch && matchesFilter;
-  });
+  const toggleFavorite = async (id) => {
+    const item = items.find((i) => i.id === id);
+    if (!item || busyId) return;
+    const next = !item.favorite;
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, favorite: next } : i)));
+    setBusyId(id);
+    try {
+      await toggleHistoryFavorite(id, next);
+    } catch (err) {
+      setItems((prev) => prev.map((i) => (i.id === id ? { ...i, favorite: !next } : i)));
+      setError(err?.message || "Could not update favorite.");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (busyId) return;
+    if (!window.confirm("Delete this translation from your history?")) return;
+    setBusyId(id);
+    setError("");
+    try {
+      await deleteHistoryItem(id);
+      setItems((prev) => prev.filter((i) => i.id !== id));
+    } catch (err) {
+      setError(err?.message || "Could not delete translation.");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return items.filter((item) => {
+      const matchesSearch =
+        !q ||
+        item.source.toLowerCase().includes(q) ||
+        item.translation.toLowerCase().includes(q);
+      const matchesFilter =
+        activeFilter === "All" ||
+        (activeFilter === "Favorites" && item.favorite) ||
+        item.mode === activeFilter;
+      return matchesSearch && matchesFilter;
+    });
+  }, [items, search, activeFilter]);
+
+  const groups = useMemo(() => {
+    const map = {};
+    filtered.forEach((item) => {
+      const key = item.group || "EARLIER";
+      if (!map[key]) map[key] = [];
+      map[key].push(item);
+    });
+    const ordered = GROUP_ORDER.filter((g) => map[g]?.length).map((g) => [g, map[g]]);
+    Object.keys(map)
+      .filter((g) => !GROUP_ORDER.includes(g))
+      .forEach((g) => ordered.push([g, map[g]]));
+    return ordered;
+  }, [filtered]);
+
+  const favoriteCount = items.filter((i) => i.favorite).length;
+  const languageCount = new Set(items.map((i) => i.targetLangLabel).filter(Boolean)).size;
 
   return (
-    <div>
-    <Navbar/>
-    <div className="history-page">
-      <img src={logo} alt="Omummu" className="navbar-logo" />
+    <AppLayout>
+      <div className="history-page page-container">
+        <header className="history-header">
+          <div>
+            <h1>History</h1>
+            <p>Review and manage your past translations</p>
+          </div>
+        </header>
 
-      <div className="history-header">
-        <div className="history-text">
-          <h3>Translation History</h3>
-          <p>Manage and review your past linguistic discoveries.</p>
-        </div>
-        <div className="history-header-actions">
-          <button className="export-btn"> Export CSV</button>
-          <button className="lang-dropdown-btn">All languages ⌄</button>
-        </div>
-      </div>
-
-      <div className="history-toolbar">
-        <div className="search-row">
-          <div className="search-box">
-            <span className="search-icon">🔍</span>
+        <div className="history-toolbar">
+          <div className="history-search">
+            <Search size={18} className="history-search__icon" aria-hidden="true" />
             <input
-              type="text"
+              type="search"
               placeholder="Search your history..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              aria-label="Search history"
             />
           </div>
 
-          <div className="filter-pills">
-            {FILTERS.map((f) => (
+          <div className="history-filters" role="tablist" aria-label="History filters">
+            {FILTERS.map((filter) => (
               <button
-                key={f}
-                className={`filter-pill ${activeFilter === f ? "is-active" : ""}`}
-                onClick={() => setActiveFilter(f)}
+                key={filter.id}
+                type="button"
+                role="tab"
+                aria-selected={activeFilter === filter.id}
+                className={`history-filter${activeFilter === filter.id ? " is-active" : ""}`}
+                onClick={() => setActiveFilter(filter.id)}
               >
-                {f}
+                {filter.label}
               </button>
             ))}
-            <button className="icon-circle" aria-label="voice search">
-              🎤
-            </button>
           </div>
         </div>
-        <div className="mode-icons-row">
-          <button className="icon-circle" aria-label="camera">
-            📷
-          </button>
-          <button className="icon-circle" aria-label="document">
-            📄
-          </button>
-        </div>
-      </div>
 
-      <div className="stats-grid">
-        {STATS.map((s) => (
-          <div className="stat-card" key={s.label}>
-            <div className="stat-icon">{s.icon}</div>
+        {error && (
+          <p className="history-error">
+            {error}{" "}
+            <button type="button" className="history-retry" onClick={loadHistory}>
+              Retry
+            </button>
+          </p>
+        )}
+
+        <div className="history-stats">
+          <div className="history-stat">
+            <span className="history-stat__icon">
+              <Clock size={20} />
+            </span>
             <div>
-              <div className="stat-value">{s.value}</div>
-              <div className="stat-label">{s.label}</div>
+              <div className="history-stat__value">{loading ? "—" : items.length}</div>
+              <div className="history-stat__label">Translations</div>
             </div>
           </div>
-        ))}
-      </div>
-
-      <div className="history-table-wrap">
-        <table className="history-table">
-          <thead>
-            <tr>
-              <th>SOURCE TEXT</th>
-              <th>TRANSLATION</th>
-              <th>LANGUAGES</th>
-              <th>MODE</th>
-              <th>DATE</th>
-              <th className="actions-head">ACTIONS</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRows.map((row) => (
-              <tr key={row.id}>
-                <td className="source-cell">{row.source}</td>
-                <td>{row.translation}</td>
-                <td>
-                  <span className="lang-pill">
-                    {row.from} → {row.to}
-                  </span>
-                </td>
-                <td className="mode-cell">
-                  <span className="mode-icon">{MODE_ICON[row.mode]}</span>
-                  {row.mode}
-                </td>
-                <td className="date-cell">{row.date}</td>
-                <td className="actions-cell">
-                  <button
-                    className={`row-icon-btn ${row.favorite ? "is-fav" : ""}`}
-                    onClick={() => toggleFavorite(row.id)}
-                    aria-label="favorite"
-                  >
-                    {row.favorite ? "★" : "☆"}
-                  </button>
-                  <button className="row-icon-btn" aria-label="copy">
-                    ⧉
-                  </button>
-                  <button
-                    className="row-icon-btn delete"
-                    onClick={() => deleteRow(row.id)}
-                    aria-label="delete"
-                  >
-                    🗑
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        <div className="table-footer">
-          <span className="results-text">
-            Showing <strong>1-{filteredRows.length}</strong> of 127 results
-          </span>
-          <div className="pagination">
-            <button className="page-btn">‹</button>
-            <button className="page-btn is-active">1</button>
-            <button className="page-btn">2</button>
-            <button className="page-btn">3</button>
-            <span className="page-dots">…</span>
-            <button className="page-btn">22</button>
-            <button className="page-btn">›</button>
+          <div className="history-stat">
+            <span className="history-stat__icon history-stat__icon--accent">
+              <Heart size={20} />
+            </span>
+            <div>
+              <div className="history-stat__value">{loading ? "—" : favoriteCount}</div>
+              <div className="history-stat__label">Favorites</div>
+            </div>
+          </div>
+          <div className="history-stat">
+            <span className="history-stat__icon">
+              <Languages size={20} />
+            </span>
+            <div>
+              <div className="history-stat__value">{loading ? "—" : languageCount}</div>
+              <div className="history-stat__label">Languages</div>
+            </div>
           </div>
         </div>
+
+        {loading && (
+          <p className="history-loading">
+            <Loader2 size={18} className="spin-inline" aria-hidden="true" /> Loading history…
+          </p>
+        )}
+
+        <div className="history-groups">
+          {!loading && items.length === 0 && !error && (
+            <div className="history-empty">
+              <p>No translations yet. Start translating!</p>
+            </div>
+          )}
+
+          {!loading && items.length > 0 && groups.length === 0 && (
+            <div className="history-empty">
+              <p>No translations match your search or filters.</p>
+            </div>
+          )}
+
+          {groups.map(([group, rows]) => (
+            <section key={group} className="history-group">
+              <h2 className="history-group__label">{group}</h2>
+              <div className="history-list">
+                {rows.map((item) => {
+                  const ModeIcon = MODE_ICONS[item.mode] || Type;
+                  const rowBusy = busyId === item.id;
+                  return (
+                    <article key={item.id} className="history-row">
+                      <span className={`history-row__mode mode-${item.mode}`} aria-hidden="true">
+                        <ModeIcon size={18} />
+                      </span>
+                      <div className="history-row__text">
+                        <div className="history-row__source">{item.source}</div>
+                        <div className="history-row__translation">{item.translation}</div>
+                      </div>
+                      <span className="history-row__pair">
+                        {item.from}→{item.to}
+                      </span>
+                      <button
+                        type="button"
+                        className={`history-row__star${item.favorite ? " is-fav" : ""}`}
+                        onClick={() => toggleFavorite(item.id)}
+                        disabled={rowBusy}
+                        aria-label={item.favorite ? "Remove from favorites" : "Add to favorites"}
+                      >
+                        <Star size={18} fill={item.favorite ? "currentColor" : "none"} />
+                      </button>
+                      <button
+                        type="button"
+                        className="history-row__delete"
+                        onClick={() => handleDelete(item.id)}
+                        disabled={rowBusy}
+                        aria-label="Delete translation"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                      <time className="history-row__time">{item.time}</time>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+        </div>
       </div>
-    </div>
-    <Footer/>
-    </div>
+    </AppLayout>
   );
 }

@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local env + stray files
+.env
+.env.*
+!.env.example
+Untitled

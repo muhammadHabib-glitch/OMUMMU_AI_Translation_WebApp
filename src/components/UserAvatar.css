@@ -1,0 +1,22 @@
+.user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.user-avatar--initials {
+  border: 2px solid var(--surface-blue);
+  background: var(--surface-blue);
+  color: var(--primary);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.user-avatar--img {
+  object-fit: cover;
+  border: 2px solid var(--surface-blue);
+  background: var(--surface-blue);
+}

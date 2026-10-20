@@ -1,0 +1,104 @@
+.subscription-section {
+  margin-top: var(--space-xxl);
+  padding: var(--space-xl);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+}
+
+.subscription-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.subscription-section__header h3 {
+  margin: 0;
+  font-size: var(--text-lg);
+  color: var(--text-primary);
+}
+
+.subscription-section__badge {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--background-subtle);
+  color: var(--text-secondary);
+}
+
+.subscription-section__badge.is-premium {
+  background: var(--surface-blue);
+  color: var(--primary);
+}
+
+.subscription-section__meta p {
+  margin: 0 0 var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.subscription-section__hint {
+  color: var(--warning) !important;
+}
+
+.subscription-section__actions {
+  margin-top: var(--space-md);
+}
+
+.subscription-section__error {
+  color: var(--error);
+  font-size: var(--text-sm);
+}
+
+.subscription-section__history {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border);
+}
+
+.subscription-section__history h4 {
+  margin: 0 0 var(--space-md);
+  font-size: var(--text-base);
+}
+
+.subscription-section__history ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.subscription-section__history li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  font-size: var(--text-sm);
+}
+
+.subscription-section__history li div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.subscription-section__history span {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.subscription-section__history em {
+  font-style: normal;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.subscription-section--loading {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}

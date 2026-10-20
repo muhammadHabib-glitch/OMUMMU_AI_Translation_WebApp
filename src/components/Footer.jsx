@@ -1,32 +1,31 @@
+import { Link } from "react-router-dom";
+import Logo from "./Logo";
 import "./Footer.css";
-import logo from "../assets/logo.png";
 
-const FOOTER_LINKS = ["Privacy Policy", "Terms of Service", "Help Center", "API Reference"];
+const LINKS = [
+  { label: "Privacy Policy", href: "#" },
+  { label: "Terms of Service", href: "#" },
+  { label: "Contact Us", href: "#" },
+];
 
 export default function Footer() {
   return (
     <footer className="app-footer">
-      <div className="app-footer__row">
-        <div className="app-footer__brand">
-          <span className="app-footer__logo" aria-hidden="true">
-            <img src={logo} alt="Omummu" className="navbar-logo" />
-          </span>
-          <span className="app-footer__name">Omummu</span>
+      <div className="app-footer__inner">
+        <div className="app-footer__top">
+          <Link to="/translate" className="app-footer__brand">
+            <Logo size={28} />
+          </Link>
+          <nav className="app-footer__links" aria-label="Footer">
+            {LINKS.map((l) => (
+              <a key={l.label} href={l.href} className="app-footer__link">
+                {l.label}
+              </a>
+            ))}
+          </nav>
         </div>
-
-        <nav className="app-footer__links" aria-label="Footer">
-          {FOOTER_LINKS.map((link) => (
-            <a key={link} href="#" className="app-footer__link">
-              {link}
-            </a>
-          ))}
-        </nav>
+        <p className="app-footer__copy">© 2024 Omummu · Empowering African Languages</p>
       </div>
-
-      <p className="app-footer__copyright">
-        © 2024 Omummu · Empowering African Languages
-      </p>
     </footer>
   );
 }
-
